@@ -282,7 +282,6 @@ sudo -u "$name" mkdir -p "/home/$name/.config/mpd/playlists/"
 echo "%wheel ALL=(ALL:ALL) ALL #LARBS" >/etc/sudoers.d/larbs-wheel-can-sudo
 echo "%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/shutdown,/usr/bin/reboot,/usr/bin/systemctl suspend,/usr/bin/wifi-menu,/usr/bin/mount,/usr/bin/umount,/usr/bin/pacman -Syu,/usr/bin/pacman -Syyu,/usr/bin/pacman -Syyu --noconfirm,/usr/bin/loadkeys,/usr/bin/pacman -Syyuw --noconfirm" >/etc/sudoers.d/larbs-cmds-without-password
 
-
 # Last message! Install complete!
 finalize
 #clear
