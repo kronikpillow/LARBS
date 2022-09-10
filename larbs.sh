@@ -91,7 +91,7 @@ Server = https://mirror.pascalpuffke.de/artix-universe/\$arch
 Server = https://artixlinux.qontinuum.space/artixlinux/universe/os/\$arch
 Server = https://mirror1.cl.netactuate.com/artix/universe/\$arch
 Server = https://ftp.crifo.org/artix-universe/" >>/etc/pacman.conf
-			pacman -Sy
+			pacman -Sy --noconfirm >/dev/null 2>&1
 		fi
 		pacman --noconfirm --needed -S \
 			artix-keyring artix-archlinux-support >/dev/null 2>&1
@@ -191,6 +191,15 @@ putgitrepo() {
 	sudo -u "$name" cp -rfT "$dir" "$2"
 }
 
+vimplugininstall() {
+	# Installs vim plugins.
+	whiptail --infobox "Installing neovim plugins..." 7 60
+	mkdir -p "/home/$name/.config/nvim/autoload"
+	curl -Ls "https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim" >  "/home/$name/.config/nvim/autoload/plug.vim"
+	chown -R "$name:wheel" "/home/$name/.config/nvim"
+	sudo -u "$name" nvim -c "PlugInstall|q|q"
+}
+
 finalize() {
 	whiptail --title "All done!" \
 		--msgbox "Congrats! Provided there were no hidden errors, the script completed successfully and all the programs and configuration files should be in place.\\n\\nTo run the new graphical environment, log out and log back in as your new user, then run the command \"startx\" to start the graphical environment (it will start automatically in tty1).\\n\\n.t Luke" 13 80
@@ -257,14 +266,17 @@ manualinstall yay || error "Failed to install AUR helper."
 installationloop
 
 whiptail --title "LARBS Installation" \
-	--infobox "Finally, installing \`libxft-bgra\` to enable color emoji in suckless software without crashes." 8 70
-pacman -Qs libxft-bgra ||
-	yes | sudo -u "$name" $aurhelper -S libxft-bgra-git >/dev/null 2>&1
+       --infobox "Finally, installing the newest version of \`libxft\` to enable color emoji in suckless software without crashes." 8 70
+pacman -Qs libxft-git ||
+       yes | sudo -u "$name" $aurhelper -S libxft-git >/dev/null 2>&1
 
 # Install the dotfiles in the user's home directory, but remove .git dir and
 # other unnecessary files.
 putgitrepo "$dotfilesrepo" "/home/$name" "$repobranch"
 rm -rf "/home/$name/.git/" "/home/$name/README.md" "/home/$name/LICENSE" "/home/$name/FUNDING.yml"
+
+# Install vim plugins if not alread present.
+[ ! -f "/home/$name/.config/nvim/autoload/plug.vim" ] && vimplugininstall
 
 # Most important command! Get rid of the beep!
 rmmod pcspkr
@@ -279,8 +291,8 @@ sudo -u "$name" mkdir -p "/home/$name/.config/mpd/playlists/"
 
 # Allow wheel users to sudo with password and allow several system commands
 # (like `shutdown` to run without password).
-echo "%wheel ALL=(ALL:ALL) ALL #LARBS" >/etc/sudoers.d/larbs-wheel-can-sudo
-echo "%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/shutdown,/usr/bin/reboot,/usr/bin/systemctl suspend,/usr/bin/wifi-menu,/usr/bin/mount,/usr/bin/umount,/usr/bin/pacman -Syu,/usr/bin/pacman -Syyu,/usr/bin/pacman -Syyu --noconfirm,/usr/bin/loadkeys,/usr/bin/pacman -Syyuw --noconfirm" >/etc/sudoers.d/larbs-cmds-without-password
+echo "%wheel ALL=(ALL:ALL) ALL" >/etc/sudoers.d/00-larbs-wheel-can-sudo
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: /usr/bin/shutdown,/usr/bin/reboot,/usr/bin/systemctl suspend,/usr/bin/wifi-menu,/usr/bin/mount,/usr/bin/umount,/usr/bin/pacman -Syu,/usr/bin/pacman -Syyu,/usr/bin/pacman -Syyu --noconfirm,/usr/bin/loadkeys,/usr/bin/yay,/usr/bin/pacman -Syyuw --noconfirm" >/etc/sudoers.d/01-larbs-cmds-without-password
 
 # Last message! Install complete!
 finalize
