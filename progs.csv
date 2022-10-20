@@ -6,6 +6,8 @@
 ,xorg-fonts,"starts the graphical server."
 ,polkit-gnome,"graphical polkit"
 ,libertinus-font,"provides the sans and serif fonts for LARBS."
+,ttf-linux-libertine,"provides the sans and serif fonts for LARBS."
+,ttf-font-awesome,"provides extended glyph support."
 A,lf-git,"is an extensive terminal file manager that everyone likes."
 ,ueberzug,"enables previews in the lf file manager."
 ,bc,"is used for a dropdown calculator."
